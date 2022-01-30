@@ -1,0 +1,7 @@
+Rule ID,Resource ID,Compliance,Exception Reason,Rule Level,Rule Info
+"AwsSolutions-IAM4","eks-emr-studio/@aws-cdk--aws-eks.KubectlProvider/Handler/ServiceRole/Resource","Non-Compliant","N/A","Error","The IAM user, role, or group uses AWS managed policies."
+"AwsSolutions-IAM5","eks-emr-studio/@aws-cdk--aws-eks.KubectlProvider/Handler/ServiceRole/Resource","Compliant","N/A","Error","The IAM entity contains wildcard permissions and does not have a cdk_nag rule suppression with evidence for those permission."
+"AwsSolutions-IAM5","eks-emr-studio/@aws-cdk--aws-eks.KubectlProvider/Handler/ServiceRole/DefaultPolicy/Resource","Compliant","N/A","Error","The IAM entity contains wildcard permissions and does not have a cdk_nag rule suppression with evidence for those permission."
+"AwsSolutions-IAM4","eks-emr-studio/@aws-cdk--aws-eks.KubectlProvider/Provider/framework-onEvent/ServiceRole/Resource","Non-Compliant","N/A","Error","The IAM user, role, or group uses AWS managed policies."
+"AwsSolutions-IAM5","eks-emr-studio/@aws-cdk--aws-eks.KubectlProvider/Provider/framework-onEvent/ServiceRole/Resource","Compliant","N/A","Error","The IAM entity contains wildcard permissions and does not have a cdk_nag rule suppression with evidence for those permission."
+"AwsSolutions-IAM5","eks-emr-studio/@aws-cdk--aws-eks.KubectlProvider/Provider/framework-onEvent/ServiceRole/DefaultPolicy/Resource","Compliant","N/A","Error","The IAM entity contains wildcard permissions and does not have a cdk_nag rule suppression with evidence for those permission."

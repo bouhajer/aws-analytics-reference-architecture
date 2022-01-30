@@ -1,0 +1,13 @@
+Rule ID,Resource ID,Compliance,Exception Reason,Rule Level,Rule Info
+"AwsSolutions-S1","data-lake-storage/DataLakeStorageTest/RawBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket has server access logs disabled."
+"AwsSolutions-S2","data-lake-storage/DataLakeStorageTest/RawBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket does not have public access restricted and blocked."
+"AwsSolutions-S3","data-lake-storage/DataLakeStorageTest/RawBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not default encryption enabled."
+"AwsSolutions-S10","data-lake-storage/DataLakeStorageTest/RawBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not require requests to use SSL."
+"AwsSolutions-S1","data-lake-storage/DataLakeStorageTest/CleanBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket has server access logs disabled."
+"AwsSolutions-S2","data-lake-storage/DataLakeStorageTest/CleanBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket does not have public access restricted and blocked."
+"AwsSolutions-S3","data-lake-storage/DataLakeStorageTest/CleanBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not default encryption enabled."
+"AwsSolutions-S10","data-lake-storage/DataLakeStorageTest/CleanBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not require requests to use SSL."
+"AwsSolutions-S1","data-lake-storage/DataLakeStorageTest/TransformBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket has server access logs disabled."
+"AwsSolutions-S2","data-lake-storage/DataLakeStorageTest/TransformBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket does not have public access restricted and blocked."
+"AwsSolutions-S3","data-lake-storage/DataLakeStorageTest/TransformBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not default encryption enabled."
+"AwsSolutions-S10","data-lake-storage/DataLakeStorageTest/TransformBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not require requests to use SSL."

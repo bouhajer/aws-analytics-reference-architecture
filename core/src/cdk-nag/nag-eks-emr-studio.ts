@@ -10,7 +10,7 @@ import { EmrEksCluster } from '../emr-eks-platform/';
 
 
 const mockApp = new App();
-const stack = new Stack(mockApp, 'stack');
+const stack = new Stack(mockApp, 'eks-emr-studio');
 
 Aspects.of(mockApp).add(new AwsSolutionsChecks({ verbose: true }));
 

@@ -5,9 +5,10 @@ const { basename, join, dirname, relative } = require('path');
 const glob = require('glob');
 
 
-const { AwsCdkConstructLibrary, DependenciesUpgradeMechanism, Semver } = require('projen');
+const { awscdk } = require('projen');
 
-const project = new AwsCdkConstructLibrary({
+
+const project = new awscdk.AwsCdkConstructLibrary({
 
   authorName: 'Amazon Web Services',
   authorUrl: 'https://aws.amazon.com',
@@ -22,7 +23,7 @@ const project = new AwsCdkConstructLibrary({
     'analytics',
   ],
 
-  cdkVersion: '1.139',
+  cdkVersion: '1.142.0',
   defaultReleaseBranch: 'main',
   license: 'MIT-0',
   name: 'aws-analytics-reference-architecture',
@@ -72,13 +73,14 @@ const project = new AwsCdkConstructLibrary({
 
   deps: [
     '@exodus/schemasafe',
+    'cdk-nag@^1.0.0',
   ],
 
   devDeps: [
     '@types/js-yaml',
     '@types/jest',
     'esbuild',
-    'aws-cdk@1.139.0',
+    'aws-cdk@1.142.0',
     'jest-runner-groups',
     'cdk-nag@^1.0.0',
   ],

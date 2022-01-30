@@ -1,11 +1,13 @@
 import { Database, DataFormat, Table } from '@aws-cdk/aws-glue';
 import { Stream } from '@aws-cdk/aws-kinesis';
-import { Aspects, Stack } from '@aws-cdk/core';
+import {App, Aspects, Stack} from '@aws-cdk/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { AwsSolutionsChecks } from 'cdk-nag';
 import { DataLakeExporter } from '../data-lake-exporter';
 
-const dataLakeExporterStack = new Stack();
+const mockApp = new App();
+
+const dataLakeExporterStack = new Stack(mockApp, 'data-lake-exporter');
 
 const stream = new Stream(dataLakeExporterStack, 'testStream');
 const db = new Database(dataLakeExporterStack, 'testDB', { databaseName: 'test_db' });

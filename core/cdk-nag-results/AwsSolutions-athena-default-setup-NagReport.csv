@@ -1,0 +1,6 @@
+Rule ID,Resource ID,Compliance,Exception Reason,Rule Level,Rule Info
+"AwsSolutions-ATH1","athena-default-setup/athenaDefault/athenaDefaultWorkgroup","Non-Compliant","N/A","Error","The Athena workgroup does not encrypt query results."
+"AwsSolutions-S1","athena-default-setup/logBucket/Resource","Non-Compliant","N/A","Error","The S3 Bucket has server access logs disabled."
+"AwsSolutions-S2","athena-default-setup/logBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not have public access restricted and blocked."
+"AwsSolutions-S3","athena-default-setup/logBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not default encryption enabled."
+"AwsSolutions-S10","athena-default-setup/logBucket/Resource","Compliant","N/A","Error","The S3 Bucket does not require requests to use SSL."

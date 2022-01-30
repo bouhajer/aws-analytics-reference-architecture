@@ -1,0 +1,3 @@
+Rule ID,Resource ID,Compliance,Exception Reason,Rule Level,Rule Info
+"AwsSolutions-IAM4","ec2-ssm-role/Ec2SsmRole/Resource","Non-Compliant","N/A","Error","The IAM user, role, or group uses AWS managed policies."
+"AwsSolutions-IAM5","ec2-ssm-role/Ec2SsmRole/Resource","Compliant","N/A","Error","The IAM entity contains wildcard permissions and does not have a cdk_nag rule suppression with evidence for those permission."

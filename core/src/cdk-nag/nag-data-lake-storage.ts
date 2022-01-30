@@ -1,9 +1,11 @@
-import { Aspects, Stack } from '@aws-cdk/core';
+import {App, Aspects, Stack} from '@aws-cdk/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { AwsSolutionsChecks } from 'cdk-nag';
 import { DataLakeStorage } from '../data-lake-storage';
 
-const dataLakeStorageStack = new Stack();
+const mockApp = new App();
+
+const dataLakeStorageStack = new Stack(mockApp, 'data-lake-storage');
 
 // Instantiate DataLakeStorage Construct with custom Props
 new DataLakeStorage(dataLakeStorageStack, 'DataLakeStorageTest', {
