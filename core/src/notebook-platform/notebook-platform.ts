@@ -7,7 +7,8 @@ import { CfnVirtualCluster } from '@aws-cdk/aws-emrcontainers';
 import { IManagedPolicy, IRole, ManagedPolicy, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { Key } from '@aws-cdk/aws-kms';
 import { BlockPublicAccess, Bucket, BucketEncryption } from '@aws-cdk/aws-s3';
-import { Aws, CfnOutput, Construct, NestedStack, RemovalPolicy, Tags } from '@aws-cdk/core';
+import { Aws, CfnOutput, Construct, NestedStack, RemovalPolicy, Stack, Tags } from '@aws-cdk/core';
+import { NagSuppressions } from 'cdk-nag';
 import { EmrEksCluster } from '../emr-eks-platform';
 import { SingletonBucket } from '../singleton-bucket';
 import { Utils } from '../utils';
@@ -270,6 +271,42 @@ export class NotebookPlatform extends NestedStack {
       'StudioServiceManagedPolicy', createStudioServiceRolePolicy(this, this.notebookPlatformEncryptionKey.keyArn, this.workspacesBucket.bucketName,
         props.studioName),
     ));
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/platform1/studioServiceRole/Resource',
+      [
+        { id: 'AwsSolutions-IAM4', reason: 'This policy is provided by AWS in the EMR Studio documentation' },
+      ],
+    );
+
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/platform1/studioSessionPolicyvincent/Resource',
+      [
+        { id: 'AwsSolutions-IAM5', reason: 'This policy is provided by AWS in the EMR Studio documentation' },
+      ],
+    );
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/platform1/vincent0ExecutionRole/Resource',
+      [
+        {
+          id: 'AwsSolutions-IAM4',
+          reason: 'This policy is provided by the user when defining a user, it is used here only as an example',
+        },
+      ],
+    );
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/platform1/ara-s3AccessLogsBucket/Resource',
+      [
+        { id: 'AwsSolutions-S1', reason: 'This bucket is used for storing other buckets access logs' },
+      ],
+    );
 
     //Create a role for the Studio
     this.studioServiceRole = new Role(this, 'studioServiceRole', {

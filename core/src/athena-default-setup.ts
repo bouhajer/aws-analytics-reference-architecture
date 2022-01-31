@@ -3,7 +3,8 @@
 
 import { CfnWorkGroup } from '@aws-cdk/aws-athena';
 import { Bucket } from '@aws-cdk/aws-s3';
-import { Construct } from '@aws-cdk/core';
+import { Construct, Stack } from '@aws-cdk/core';
+import { NagSuppressions } from 'cdk-nag';
 import { SingletonBucket } from './singleton-bucket';
 
 /**
@@ -37,6 +38,17 @@ export class AthenaDefaultSetup extends Construct {
         },
       },
     });
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'athena-default-setup/athenaDefault/athenaDefaultWorkgroup',
+      [
+        {
+          id: 'AwsSolutions-ATH1',
+          reason: 'Not encrypting results, the user might have encryption in place, we do not want to change the KMS key',
+        },
+      ],
+    );
 
   }
 }

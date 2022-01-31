@@ -293,10 +293,9 @@ export class EmrEksCluster extends Construct {
 
     NagSuppressions.addResourceSuppressionsByPath(
       Stack.of(this),
-      'eks-emr-studio/data-platform/AsgTagProvider/*',
+      'eks-emr-studio/data-platform/AsgTagProvider/CustomResourceProvider/framework-onEvent/ServiceRole/Resource',
       [
         { id: 'AwsSolutions-IAM4', reason: 'This is provided by the AWS construct for creating Custom Resource' },
-        { id: 'AwsSolutions-IAM5', reason: 'This is provided by the AWS construct creating Custom Resource' },
       ],
     );
 

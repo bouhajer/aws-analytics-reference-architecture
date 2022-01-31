@@ -1,8 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import { Bucket, StorageClass, BucketEncryption } from '@aws-cdk/aws-s3';
-import { Construct, Aws, RemovalPolicy, Duration } from '@aws-cdk/core';
+import { Bucket, StorageClass, BucketEncryption, BlockPublicAccess } from '@aws-cdk/aws-s3';
+import { Construct, Aws, RemovalPolicy, Duration, Stack } from '@aws-cdk/core';
+import { NagSuppressions } from 'cdk-nag';
+import { SingletonBucket } from './singleton-bucket';
 
 /**
  * Properties for the DataLakeStorage Construct
@@ -95,6 +97,9 @@ export class DataLakeStorage extends Construct {
           transitions: rawTransitions,
         },
       ],
+      serverAccessLogsBucket: SingletonBucket.getOrCreate(this, 'ara-s3AccessLogs'),
+      serverAccessLogsPrefix: 'raw-bucket',
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
     // Prepare Amazon S3 Lifecycle Rules for clean data
@@ -125,6 +130,9 @@ export class DataLakeStorage extends Construct {
           transitions: cleanTransitions,
         },
       ],
+      serverAccessLogsBucket: SingletonBucket.getOrCreate(this, 'ara-s3AccessLogs'),
+      serverAccessLogsPrefix: 'clean-bucket',
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
     // Prepare Amazon S3 Lifecycle Rules for clean data
@@ -155,6 +163,18 @@ export class DataLakeStorage extends Construct {
           transitions: transformTransitions,
         },
       ],
+      serverAccessLogsBucket: SingletonBucket.getOrCreate(this, 'ara-s3AccessLogs'),
+      serverAccessLogsPrefix: 'transform-bucket',
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'data-lake-storage/ara-s3AccessLogsBucket/Resource',
+      [
+        { id: 'AwsSolutions-S1', reason: 'This policy is provided by AWS in the EMR Studio documentation' },
+      ],
+    );
+
   }
 }

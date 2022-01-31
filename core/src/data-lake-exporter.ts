@@ -5,6 +5,8 @@ import { CfnDeliveryStream } from '@aws-cdk/aws-kinesisfirehose';
 import { LogGroup, RetentionDays, LogStream } from '@aws-cdk/aws-logs';
 import { Bucket, Location } from '@aws-cdk/aws-s3';
 import { Construct, Aws, RemovalPolicy, Stack } from '@aws-cdk/core';
+import { NagSuppressions } from 'cdk-nag';
+import { SingletonKey } from './singleton-kms-key';
 
 
 /**
@@ -67,11 +69,21 @@ export class DataLakeExporter extends Construct {
     // Get the Bucket from Amazon S3 Location sink
     const sinkBucket = Bucket.fromBucketName(this, 'sinkBucket', props.sinkLocation.bucketName);
 
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'data-lake-exporter/testTable/Bucket/Resource',
+      [{ id: 'AwsSolutions-S1', reason: 'This bucket is initialized from one already existing in the user account' },
+        { id: 'AwsSolutions-S2', reason: 'This bucket is initialized from one already existing in the user account' },
+        { id: 'AwsSolutions-S3', reason: 'This bucket is initialized from one already existing in the user account' },
+        { id: 'AwsSolutions-S10', reason: 'This bucket is initialized from one already existing in the user account' }],
+    );
+
     // Create log group for storing Amazon Kinesis Firehose logs.
     const logGroup = new LogGroup(this, 'dataLakeExporterLogGroup', {
       logGroupName: '/data-lake-exporter/',
       removalPolicy: RemovalPolicy.DESTROY,
       retention: RetentionDays.ONE_DAY,
+      encryptionKey: SingletonKey.getOrCreate(this, 'stackEncryptionKey'),
     });
 
     // Create the Kinesis Firehose log stream.
