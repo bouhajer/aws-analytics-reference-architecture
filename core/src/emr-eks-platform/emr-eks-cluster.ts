@@ -2,30 +2,25 @@
 // SPDX-License-Identifier: MIT-0
 
 import { join } from 'path';
-import {
-  SubnetType,
-  VpcAttributes,
-  Vpc,
-  IVpc,
-  FlowLogDestination,
-} from '@aws-cdk/aws-ec2';
-import { KubernetesVersion, Cluster, CapacityType, Nodegroup } from '@aws-cdk/aws-eks';
+import { FlowLogDestination, IVpc, SubnetType, Vpc, VpcAttributes } from '@aws-cdk/aws-ec2';
+import { CapacityType, Cluster, KubernetesVersion, Nodegroup } from '@aws-cdk/aws-eks';
 import { CfnVirtualCluster } from '@aws-cdk/aws-emrcontainers';
 import {
-  PolicyStatement,
-  PolicyDocument,
-  IManagedPolicy,
-  Policy,
-  Role,
-  ManagedPolicy,
-  FederatedPrincipal,
   CfnServiceLinkedRole,
+  Effect,
+  FederatedPrincipal,
+  IManagedPolicy,
+  ManagedPolicy,
+  Policy,
+  PolicyDocument,
+  PolicyStatement,
+  Role,
   ServicePrincipal,
 } from '@aws-cdk/aws-iam';
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { Bucket, Location } from '@aws-cdk/aws-s3';
-import { BucketDeployment, Source } from '@aws-cdk/aws-s3-deployment';
-import { Construct, Tags, Stack, Duration, CustomResource, Fn, CfnOutput } from '@aws-cdk/core';
+import { BucketDeployment, Source } from '@aws-cdk/aws-s3-deployment';
+import { CfnOutput, Construct, CustomResource, Duration, Fn, Stack, Tags } from '@aws-cdk/core';
 import { NagSuppressions } from 'cdk-nag';
 import { SingletonBucket } from '../singleton-bucket';
 import { SingletonKey } from '../singleton-kms-key';
@@ -40,7 +35,7 @@ import * as CriticalDefaultConfig from './resources/k8s/emr-eks-config/critical.
 import * as NotebookDefaultConfig from './resources/k8s/emr-eks-config/notebook.json';
 import * as SharedDefaultConfig from './resources/k8s/emr-eks-config/shared.json';
 import * as IamPolicyAlb from './resources/k8s/iam-policy-alb.json';
-import * as IamPolicyAutoscaler from './resources/k8s/iam-policy-autoscaler.json';
+//import * as IamPolicyAutoscaler from './resources/k8s/iam-policy-autoscaler.json';
 import * as K8sRoleBinding from './resources/k8s/rbac/emr-containers-role-binding.json';
 import * as K8sRole from './resources/k8s/rbac/emr-containers-role.json';
 
@@ -106,7 +101,7 @@ export class EmrEksCluster extends Construct {
   private static readonly DEFAULT_EMR_VERSION = 'emr-6.4.0-latest';
   private static readonly DEFAULT_EKS_VERSION = KubernetesVersion.V1_21;
   private static readonly DEFAULT_CLUSTER_NAME = 'data-platform';
-  private static readonly AUTOSCALING_POLICY = PolicyStatement.fromJson(IamPolicyAutoscaler);
+  //private static readonly AUTOSCALING_POLICY = PolicyStatement.fromJson(IamPolicyAutoscaler);
   public readonly eksCluster: Cluster;
   public readonly notebookDefaultConfig: string;
   public readonly criticalDefaultConfig: string;
@@ -183,9 +178,48 @@ export class EmrEksCluster extends Construct {
       name: 'cluster-autoscaler',
       namespace: 'kube-system',
     });
+
+    let autoscallingPolicyDescribe =
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: [
+            'autoscaling:DescribeAutoScalingGroups',
+            'autoscaling:DescribeAutoScalingInstances',
+            'autoscaling:DescribeLaunchConfigurations',
+            'autoscaling:DescribeTags',
+            'ec2:DescribeLaunchTemplateVersions',
+          ],
+          resources: ['*'],
+        });
+
+
+    let autoscallingPolicyMutateGroup =
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: [
+            'autoscaling:SetDesiredCapacity',
+            'autoscaling:TerminateInstanceInAutoScalingGroup',
+          ],
+          resources: ['*'],
+          conditions: {
+            'ForAnyValue:StringEquals': {
+              'aws:ResourceTag/eks:cluster-name': props.eksClusterName,
+            },
+          },
+        });
+
     // Add the proper Amazon IAM Policy to the Amazon IAM Role for the Cluster Autoscaler
     AutoscalerServiceAccount.addToPrincipalPolicy(
-      EmrEksCluster.AUTOSCALING_POLICY,
+      autoscallingPolicyDescribe,
+    );
+    AutoscalerServiceAccount.addToPrincipalPolicy(
+      autoscallingPolicyMutateGroup,
+    );
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/data-platformCluster/Autoscaler/Role/DefaultPolicy/Resource',
+      [{ id: 'AwsSolutions-IAM5', reason: 'These are actions that are of type list and should have a wildcard' }],
     );
 
     // @todo: check if we can create the service account from the Helm Chart
@@ -256,6 +290,15 @@ export class EmrEksCluster extends Construct {
     this.nodegroupAsgTagsProviderServiceToken = new EmrEksNodegroupAsgTagProvider(this, 'AsgTagProvider', {
       eksClusterName: this.clusterName,
     }).provider.serviceToken;
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/data-platform/AsgTagProvider/*',
+      [
+        { id: 'AwsSolutions-IAM4', reason: 'This is provided by the AWS construct for creating Custom Resource' },
+        { id: 'AwsSolutions-IAM5', reason: 'This is provided by the AWS construct creating Custom Resource' },
+      ],
+    );
 
     // Create the Amazon EKS Nodegroup for tooling
     this.addNodegroupCapacity('tooling', EmrEksNodegroup.TOOLING_ALL);
@@ -342,6 +385,17 @@ export class EmrEksCluster extends Construct {
     });
     albService.node.addDependency(albServiceAccount);
     albService.node.addDependency(certManager);
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      Stack.of(this),
+      'eks-emr-studio/data-platform/AWSLoadBalancerControllerIAMPolicy/Resource',
+      [{
+        id: 'AwsSolutions-IAM5',
+        reason: 'IAM policy as provided by the open source community for AWS Load Balancer Controller ' +
+              'in https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.3.1/docs/install/iam_policy.json',
+      }],
+    );
+
 
     // Add the kubernetes dashboard from helm chart
     this.eksCluster.addHelmChart('KubernetesDashboard', {
