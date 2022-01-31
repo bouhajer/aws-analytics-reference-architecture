@@ -9,6 +9,7 @@ import { Key } from '@aws-cdk/aws-kms';
 import { BlockPublicAccess, Bucket, BucketEncryption } from '@aws-cdk/aws-s3';
 import { Aws, CfnOutput, Construct, NestedStack, RemovalPolicy, Tags } from '@aws-cdk/core';
 import { EmrEksCluster } from '../emr-eks-platform';
+import { SingletonBucket } from '../singleton-bucket';
 import { Utils } from '../utils';
 import {
   createIAMFederatedRole,
@@ -180,6 +181,7 @@ export class NotebookPlatform extends NestedStack {
   private readonly federatedIdPARN : string | undefined;
   private readonly authMode :string;
   private studioServiceRole: IRole;
+  private readonly s3AccessLogBucket: Bucket;
 
   /**
    * @public
@@ -197,6 +199,9 @@ export class NotebookPlatform extends NestedStack {
     this.studioSubnetList = [];
     this.managedEndpointExecutionPolicyArnMapping = new Map<string, string>();
     this.authMode = props.studioAuthMode;
+
+    // Create an Amazon S3 Bucket for S3 access logs
+    this.s3AccessLogBucket = SingletonBucket.getOrCreate(this, 'ara-s3AccessLogs');
 
     if (props.idpArn !== undefined) {
       this.federatedIdPARN = props.idpArn;
@@ -256,6 +261,8 @@ export class NotebookPlatform extends NestedStack {
       encryptionKey: this.notebookPlatformEncryptionKey,
       encryption: BucketEncryption.KMS,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      serverAccessLogsBucket: this.s3AccessLogBucket,
+      serverAccessLogsPrefix: `${props.studioName}`,
     });
 
     //Create a Managed policy for Studio service role

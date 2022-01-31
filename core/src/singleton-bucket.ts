@@ -3,6 +3,7 @@
 
 import { BlockPublicAccess, Bucket, BucketEncryption } from '@aws-cdk/aws-s3';
 import { Construct, Stack, Aws, RemovalPolicy } from '@aws-cdk/core';
+import { SingletonKey } from './singleton-kms-key';
 
 /**
  * An Amazon S3 Bucket implementing the singleton pattern
@@ -19,7 +20,8 @@ export class SingletonBucket extends Bucket {
     const id = `${bucketName}Bucket`;
     return stack.node.tryFindChild(id) as Bucket || new Bucket(stack, id, {
       bucketName: `ara-${bucketName}-${Aws.ACCOUNT_ID}`,
-      encryption: BucketEncryption.KMS_MANAGED,
+      encryption: BucketEncryption.KMS,
+      encryptionKey: SingletonKey.getOrCreate(stack, 'stackEncryptionKey'),
       enforceSSL: true,
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
